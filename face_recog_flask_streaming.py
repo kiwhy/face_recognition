@@ -71,10 +71,10 @@ def gen():
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
         ret, frame = cv2.imencode('.jpg', frame)
-        frame = io.BytesIO(frame)
+        frame = frame.tobytes()
 
         yield (b'--frame\r\n'
-               b'content-type: image/jpg\r\n\r\n' + frame.read() + b'\r\n')
+               b'content-type: image/jpg\r\n\r\n' + frame + b'\r\n')
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
