@@ -26,10 +26,12 @@ face_locations = []
 face_encodings = []
 face_names = []
 
+
 @app.route('/')
 def index():
     "video streaming"
     return render_template('index.html')
+
 
 def gen():
     while True:
@@ -82,9 +84,11 @@ def gen():
     video_capture.release()
     cv2.destroyAllWindows()
 
+
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-if __name__ =='__main__':
+
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, threaded=True)
