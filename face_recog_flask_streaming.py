@@ -1,3 +1,4 @@
+import io
 import face_recognition
 import cv2
 import numpy as np
@@ -69,10 +70,11 @@ def gen():
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-        cv2.imwrite('pic.jpg', frame)
+        ret, frame = cv2.imencode('.jpg', frame)
+        frame = io.BytesIO(frame)
 
         yield (b'--frame\r\n'
-               b'content-type: image/jpg\r\n\r\n' + open('pic.jpg', 'rb').read() + b'\r\n')
+               b'content-type: image/jpg\r\n\r\n' + frame.read() + b'\r\n')
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
