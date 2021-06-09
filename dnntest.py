@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import numpy
 from flask import Flask, render_template, Response
 
 app = Flask(__name__)
