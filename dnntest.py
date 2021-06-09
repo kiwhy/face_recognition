@@ -18,7 +18,7 @@ def cap():
     while True:
         ret, img = video_capture.read()
         if ret == True:
-            img = cv2.resize(img, None, fx=0.5, fy=0.5)
+            #img = cv2.resize(img, None, fx=0.5, fy=0.5)
             h, w = img.shape[:2]
             blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)),
                                          1.0, (300, 300), (104.0, 117.0, 123.0))
