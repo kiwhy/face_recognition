@@ -4,6 +4,7 @@ import datetime
 import imutils
 import time
 import cv2
+import multiprocessing
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
@@ -13,7 +14,13 @@ args = vars(ap.parse_args())
 def makefile():
     now = datetime.datetime.now().strftime("%y년%m월%d일%H시%M분-%S초")
     global out
-    out = cv2.VideoWriter(now + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 60, (640,480))
+    out = cv2.VideoWriter(now + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 480))
+    start = time.time()
+    while True:
+        if (time.time() - start >= 600):
+            now = datetime.datetime.now().strftime("%y년%m월%d일%H시%M분-%S초")
+            out = cv2.VideoWriter(now + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 480))
+            start = time.time()
 
 def motion_detect():
     if args.get("video", None) is None:
@@ -73,5 +80,9 @@ def motion_detect():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    makefile()
-    motion_detect()
+    t1=multiprocessing.Process(target=makefile)
+    t2=multiprocessing.Process(target=motion_detect)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()

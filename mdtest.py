@@ -4,28 +4,27 @@ import datetime
 import imutils
 import time
 import cv2
-import pymysql
+from mdsaver import EventWriter
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
 ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
+ap.add_argument("-f", "--fps", type=int, default=20, help="FPS of output video")
+ap.add_argument("-c", "--codec", type=str, default="DIVX", help="codec of output video")
+ap.add_argument("-b", "--buffer-size", type=int, default=32, help="buffer size of video")
+ap.add_argument("-o", "--output", required=True, help="path to output directory")
 args = vars(ap.parse_args())
-
-log_db = pymysql.connect(
-    user='root',
-    password='test',
-    host='127.0.0.1',
-    database='eventlog',
-    charset='utf8'
-)
 
 if args.get("video", None) is None:
     vs = VideoStream(0).start()
     time.sleep(2.0)
 
 firstFrame = None
-logswitch = False
-logswitch2 = False
+
+kcw = EventWriter(bufSize=args["buffer_size"])
+consecFrames = 0
+
+start = time.time()
 
 while True:
     frame_saved = vs.read()
@@ -63,33 +62,27 @@ while True:
     cv2.putText(frame, "Room Status: {}".format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"), (10, frame.shape[0] -10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
+
+
+    # if (time.time() - start >= 600):
+    #     now = datetime.datetime.now().strftime("%y년%m월%d일%H시%M분-%S초")
+    #     out = cv2.VideoWriter(now + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 480))
+    #     start = time.time()
+
+    if text != "Unoccupied":
+        if not kcw.recording:
+            timestamp = datetime.datetime.now()
+            p="{}/{}.avi".format(args["output"], timestamp.strftime("%Y%m%d-%H%M%S"))
+            kcw.start(p, cv2.VideoWriter_fourcc(*args["codec"]), args["fps"])
+        consecFrames += 1
+    kcw.update(frame)
+
+    if text == "Occupied":
+        kcw.finish()
+
     cv2.imshow("Security Feed", frame)
     cv2.imshow("Thresh", thresh)
     cv2.imshow("Frame Delta", frameDelta)
-
-
-
-    if text == "Unoccupied":
-        logswitch2 = True
-        logswitch = False
-
-    if text != "Unoccupied":
-        logswitch = True
-
-    if logswitch == True:
-        if logswitch2 == True:
-            cursor = log_db.cursor(pymysql.cursors.DictCursor)
-            sql = "insert into eventlogtbl (log) values (%s)"
-            val = datetime.datetime.now().strftime("%y년%m월%d일%H시%M분%S초")
-            cursor.execute(sql, val)
-            log_db.commit()
-
-            now = datetime.datetime.now().strftime("%y년%m월%d일%H시%M분-%S초")
-            out = cv2.VideoWriter(now + ".avi", cv2.VideoWriter_fourcc(*'DIVX'), 60, (640, 480))
-
-            logswitch2 = False
-
-        out.write(frame_saved)
 
     key = cv2.waitKey(1) & 0xFF
 
