@@ -5,28 +5,45 @@ from models import db
 from models import User
 from flask import session
 from flask_wtf.csrf import CSRFProtect
-from Forms import RegisterForm, LoginForm
+from Forms import UserCreateForm, LoginForm
+import pymysql
 
 app = Flask(__name__)
 
 @app.route('/')
 def mainpage():
     userid = session.get('userid', None)
-    return render_template('main.html', userid=userid)
+    log_db = pymysql.connect(
+        user='root',
+        password='test',
+        host='192.168.3.19',
+        database='eventlog',
+        charset='utf8'
+    )
+    cursor = log_db.cursor()
+
+    sql = 'select * from eventlogtbl'
+    cursor.execute(sql)
+
+    data_list = cursor.fetchall()
+    # return render_template('index2.html', data_list=data_list)
+    return render_template('main.html', userid=userid, data_list=data_list)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
+    form = UserCreateForm()
+    if form.validate_on_submit():  # 내용 채우지 않은 항목이 있는지까지 체크
         usertable = User()
         usertable.userid = form.data.get('userid')
         usertable.email = form.data.get('email')
         usertable.password = form.data.get('password')
 
-        db.session.add(usertable)
-        db.session.commit()
-        return "등록성공"
+        db.session.add(usertable)  # DB저장
+        db.session.commit()  # 변동사항 반영
+
+        return redirect('/')
     return render_template('register.html', form=form)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

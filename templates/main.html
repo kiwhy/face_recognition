@@ -9,17 +9,41 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     </head>
 <body>
+    {% extends 'base.html' %}
+    {% block content %}
     <div class = "container">
         <div class="row mt-5">
-            <h1>이곳은 메인 페이지</h1>
+            <h1>메인 페이지</h1>
         </div>
         <br>
         <div class=form-group>
             {%if userid%}
             {{userid}}<a>님 안녕하세요!</a><br>
-            <a href="/logout">로그아웃</a>
+             <table class="table table-hover table-striped text-center" style="border: 1px solid;">
+                <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>로그</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <br>
+                    <h1 class="text-center"><a href="#">이벤트 발생내역</a></h1>
+                    <br>
+                    <br>
+
+                    {% for i in data_list %}
+                    <tr>
+                        <td>{{ i[0] }}</td>
+                        <td>{{ i[1] }}</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+             </table>
             {%endif%}
         </div>
     </div>
+    {% endblock %}
 </body>
 </html>

@@ -14,7 +14,7 @@ args = vars(ap.parse_args())
 log_db = pymysql.connect(
     user='root',
     password='test',
-    host='127.0.0.1',
+    host='192.168.3.19',
     database='eventlog',
     charset='utf8'
 )
@@ -73,7 +73,7 @@ while True:
         logswitch2 = True
         logswitch = False
 
-    if text != "Unoccupied":
+    if text == "Occupied":
         logswitch = True
 
     if logswitch == True:

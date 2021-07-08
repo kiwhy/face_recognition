@@ -1,13 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms import PasswordField
-from wtforms.validators import DataRequired, EqualTo
+from wtforms import PasswordField, StringField
+from wtforms.validators import DataRequired, EqualTo, Length, Email
 from models import User
 
-class RegisterForm(FlaskForm):
-    userid = StringField('userid', validators=[DataRequired()])
-    email = StringField('email', validators=[DataRequired()])
-    password = PasswordField('password', validators=[DataRequired(), EqualTo('password_2')])
+class UserCreateForm(FlaskForm):
+    userid = StringField('userid', validators=[DataRequired(), Length(min=3, max=25)])
+    email = StringField('email', validators=[DataRequired(), Email()])
+    password = PasswordField('password', validators=[DataRequired(), EqualTo('password_2', '비밀번호가 일치하지 않습니다')])
     password_2 = PasswordField('repassword', validators=[DataRequired()])
 
 class LoginForm(FlaskForm):
